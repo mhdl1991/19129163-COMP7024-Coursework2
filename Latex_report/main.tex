@@ -1,0 +1,34 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+
+\title{COMP7024 Coursework2- Developing a file encryption system for the Minix Operating System}
+\author{19129163 Mohammad Ali Khan}
+\date{April 2023}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+\paragraph{}The objective of this project is to develop a program for Minix 3.4 that will encrypt and decrypt files on the system.
+\paragraph{}The program will be written in the C programming language and be implemented as a \textit{device driver}.
+
+\section{Requirements}
+\paragraph{}Seeing as 
+
+\section{Encryption}
+\paragraph{}A common bit of advice regarding encryption that can be found in discussions pertaining to encryption is \textit{"Never roll your own cryptosystem"}- namely, from both a technical and security standpoints it is more advisable to use an existing, tried and tested cryptosystem than it is to make your own- From a \textbf{technical} standpoint, it's very difficult to build your own cryptosystem and test it, and to make it \textbf{secure}, which ties into the \textbf{security} standpoint for not rolling your own cryptosystem
+
+\paragraph{}So for this system, we will be using \textbf{OpenSSL}, which comes with Minix 3, but an updated version can be installed using the pkgin utility, and has a  number of encryption algorithms and cipher families.
+
+\paragraph{}As per the OpenSSL documentation, it contains RSA, SHA, DES, SSL, TLS cipher suites/families. Care must be taken in the selection as it also currently includes a number of deprecated ciphers
+
+
+\section{Design}
+\paragraph{}the program will have two main functions, \textit{file\_encrypt} and \textit{file\_decrypt}. 
+
+\section{Implementation}
+\paragraph{}As per the Minix documentation 
+
+\section{References}
+\end{document}
