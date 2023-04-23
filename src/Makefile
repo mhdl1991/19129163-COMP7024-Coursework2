@@ -7,7 +7,7 @@ FILESNAME=${PROG}
 FILESDIR= /etc/system.conf.d
  
 DPADD+= ${LIBCHARDRIVER} ${LIBSYS}
-LDADD+= -lchardriver -lsys
+LDADD+= -lchardriver -lsys -lcrypto -lssl
  
 MAN=
  
