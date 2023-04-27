@@ -1,33 +1,16 @@
+#include <minix/drivers.h>
+#include <minix/chardriver.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <syslog.h>
-
-#include <inotify.h>
-#include <inotify-syscalls.h>
+#include <minix/ds.h>
 
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/aes.h>
 #include <openssl/rand.h>
 
-#include <minix/syslib.h>
+// minix encryption / decryption driver
 
-#define EVENT_SIZE (sizeof (struct inotify_event))
-#define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
-
-
-void print_uchar_buffer(unsigned char *buf, int buf_len) {
-	if (!buf) {return;}
-	if (!buf_len) {return;}
-	for (int i = 0; i < buf_len; i++) { 
-	 	printf("%02x ", *(buf + i)); 
-		if ((i%8==7) || (i == buf_len - 1) ) {printf("\n");}
-	}
-}
 
 void handle_errors(void) {
     ERR_print_errors_fp(stderr);
@@ -178,108 +161,39 @@ int file_encrypt(char *in_file, char *out_file, unsigned char *key, unsigned cha
 	if (plaintext) { free(plaintext); }
 	return 0;
 }
+
+
  
-static void skeleton_daemon() {
-    pid_t pid;
-    
-    /* Fork off the parent process */
-    pid = fork();
-    
-    /* An error occurred */
-    if (pid < 0)
-        exit(EXIT_FAILURE);
-    
-     /* Success: Let the parent terminate */
-    if (pid > 0)
-        exit(EXIT_SUCCESS);
-    
-    /* On success: The child process becomes session leader */
-    if (setsid() < 0)
-        exit(EXIT_FAILURE);
-    
-    /* Catch, ignore and handle signals */
-    /* Signal handling goes here */
-	
-    signal(SIGCHLD, SIG_IGN);
-    signal(SIGHUP, SIG_IGN);
-    
-    /* Fork off for the second time*/
-    pid = fork();
-    
-    /* An error occurred */
-    if (pid < 0)
-        exit(EXIT_FAILURE);
-    
-    /* Success: Let the parent terminate */
-    if (pid > 0)
-        exit(EXIT_SUCCESS);
-    
-    /* Set new file permissions */
-    umask(0);
-    
-    /* Change the working directory to the root directory */
-    /* or another appropriated directory */
-    chdir("/");
-    
-    /* Close all open file descriptors */
-    int x;
-    for (x = sysconf(_SC_OPEN_MAX); x>=0; x--)
-    {
-        close (x);
-    }
-    
-    /* Open the log file */
-    openlog ("encrypt_daemon", LOG_PID, LOG_DAEMON);
+
+ 
+static void sef_local_startup() {
+    /*
+     * Register init callbacks. Use the same function for all event types
+     */
+    sef_setcb_init_fresh(sef_cb_init);
+    sef_setcb_init_lu(sef_cb_init);
+    sef_setcb_init_restart(sef_cb_init);
+ 
+    /*
+     * Register live update callbacks.
+     */
+    sef_setcb_lu_state_save(sef_cb_lu_state_save);
+ 
+    /* Let SEF perform startup. */
+    sef_startup();
 }
-
-int main()
-{	
-	// load credentials
-	unsigned char *key, *iv;
-	char *line;
-	int l_counter = 0, fd;
-	size_t len = 0;
-	ssize_t read;
-	// read key and iv from file
-	FILE *credentials = fopen("keyfile", "rb");
-	if (!credentials) {exit(EXIT_FAILURE);}
-	while((read = getline(&line, &len, credentials)) != -1) {
-		/* A 256 bit key */
-		if (l_counter = 0) {key = (unsigned char *) line;}
-		/* A 128 bit IV */
-		if (l_counter = 1) {iv = (unsigned char *) line;}
-		l_counter++;
-	}
-	if (line) {free(line);}
-	fclose(credentials);
-
-
-	// daemon setup
-    skeleton_daemon();	
-	
-	fd = inotify_init();	// create inotify instance;
-	if ( fd < 0 ) { perror( "inotify_init" ); }
-	
-	
-	
-    
-    while (1)
-    {
-        //TODO: Insert daemon code here.
-        syslog (LOG_NOTICE, "custom file encryption daemon started.");
-		syslog (LOG_NOTICE,)
-		
-		
-		//encrypt and decrypt files that are opened
-		
-		//check to make sure a file is encrypted
-		
-        sleep (20);
-        break;
-    }
-   
-    syslog (LOG_NOTICE, "custom file encryption daemon terminated.");
-    closelog();
-    
-    return EXIT_SUCCESS;
+ 
+ 
+int main(void)
+{
+    /*
+     * Perform initialization.
+     */
+    sef_local_startup();
+ 
+    /*
+     * Run the main loop.
+     */
+    //chardriver_task(&hello_tab);
+    return OK;
 }
