@@ -236,8 +236,8 @@ int main()
 {	
 	// load credentials
 	unsigned char *key, *iv;
-	char *line;
-	int l_counter = 0, fd;
+	char *line, buffer[EVENT_BUF_LEN];
+	int l_counter = 0, fd, wd, i;
 	size_t len = 0;
 	ssize_t read;
 	// read key and iv from file
@@ -260,6 +260,12 @@ int main()
 	fd = inotify_init();	// create inotify instance;
 	if ( fd < 0 ) { perror( "inotify_init" ); }
 	
+	wd = inotify_add_watch( fd,  "/", IN_ALL_EVENTS  /* IN_IGNORED | IN_OPEN | IN_CLOSE_WRITE | IN_ATTRIB | IN_CREATE | IN_DELETE |IN_CLOSE | IN_MODIFY | IN_ACCESS */ );
+
+	if(wd<0){
+		syslog(LOG_NOTICE, "wd < 0");
+		perror("inotify_add_watch");    
+	}
 	
 	
     
@@ -267,13 +273,24 @@ int main()
     {
         //TODO: Insert daemon code here.
         syslog (LOG_NOTICE, "custom file encryption daemon started.");
-		syslog (LOG_NOTICE,)
+
+		/*read to determine the event change happens on directory. Actually this read blocks until the change event occurs*/
+			syslog (LOG_NOTICE, "BEFORE READ IN BUFFER");
+			length = read( fd, buffer, EVENT_BUF_LEN );
+
+		syslog (LOG_NOTICE, "AFTER READ IN BUFFER.");
+
+		/*checking for error*/
+		if ( length < 0 ) { perror( "read" ); }
+		else if(length == 0){ syslog(LOG_NOTICE," length =0 " ); continue; }
 		
-		
-		//encrypt and decrypt files that are opened
-		
-		//check to make sure a file is encrypted
-		
+		/*actually read return the list of change events happens. Here, read the change event one by one and process it accordingly.*/
+		while ( i < length ) {
+			struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
+			
+			i++;
+		}
+		i = 0;
         sleep (20);
         break;
     }
