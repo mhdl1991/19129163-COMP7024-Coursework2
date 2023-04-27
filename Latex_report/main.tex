@@ -61,7 +61,15 @@
 \section{Development}
     \paragraph{}The program was first built as a standalone bit of C before attempting to integrate it with the Minix operating system. This was done to make sure the file encryption and decryption functions worked properly and didn't result in bugs, memory leaks, unintended alterations to files, or other unintended consequences, and to reduce damage to the system.
 
+    \subsection{A note on developing encryption/decryption functions}
+        \paragraph{}The encryption/decryption functions were more or less adapted from sample code in the OpenSSL documentation, with added code to take the contents of a file and read them into a \textbf{unsigned char} buffer, which the OpenSSL functions for encryption/decryption accept as arguments, and then write unsigned char buffers to files after encryption/decryption.
 
+        \begin{figure}[htbp]
+            \centering\includegraphics[width=\textwidth]{encrypt_function_screenshot_1.png}
+            \caption{C function that encrypts a file using AES-256}
+            \label{fig:my_label}
+        \end{figure}
+    \newpage
     \subsection{A note on Daemon development}
         \paragraph{}the basic principle of how a daemon operates involves the following steps:
         \begin{itemize}
@@ -76,9 +84,9 @@
         \paragraph{}It will then run until system shutdown, and handle \textbf{signals} sent by the Operating system.
         \paragraph{}Minix also provides the \textbf{daemon} command that turns other processes into daemons, automatically performing the tasks needed to set them up as such \parencite{daemon_command_minix}.
 
-        \begin{figure}
+        \begin{figure}[htbp]
             \centering
-            \includegraphics{daemon_code_screenshot_1.png}
+            \includegraphics[width=\textwidth]{daemon_code_screenshot_1.png}
             \caption{C function that provides a "skeleton" for making a daemon}
             \label{fig:my_label}
         \end{figure}
