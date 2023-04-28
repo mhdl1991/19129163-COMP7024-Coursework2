@@ -20,8 +20,10 @@
 \date{April 2023}
 
 \begin{document}
-
-\maketitle
+    \setmainfont{Arial}
+    \includepdf[pages=-]{_cover.pdf}
+    \newpage
+    \maketitle
 
 \section{Description}
     \paragraph{}The objective of this project is to develop a program for the Minix 3.4 Operating System (OS) that will encrypt and decrypt files on the system when they are stored to disk and when the user reads them respectively, to prevent them from being read by outsiders.
