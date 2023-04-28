@@ -106,7 +106,6 @@ int file_decrypt(char *in_file, char *out_file, unsigned char *key, unsigned cha
 
 int file_encrypt(char *in_file, char *out_file, unsigned char *key, unsigned char *iv) {
 	
-	//printf("ENCRYPTING FILE:\t%s\n", in_file);
 	EVP_CIPHER_CTX *ctx;
 	unsigned char *plaintext, *ciphertext;
 	int plaintext_length,  ciphertext_length, len;
@@ -131,40 +130,21 @@ int file_encrypt(char *in_file, char *out_file, unsigned char *key, unsigned cha
 		fclose(f_in);
 	} else { return 1; } // failure when opening file
 	if (!plaintext) { return 1; }
-	// prints the unsigned char buffer, for debugging purposes
-	//printf("Plaintext buffer:\n");
-	//print_uchar_buffer(plaintext, plaintext_length);
 
-	// encrypt the buffer using AES
-    /* Create and initialise the context */
+	// initialize ctx
     if(!(ctx = EVP_CIPHER_CTX_new())) { handle_errors(); }
-    /*
-     * Initialise the encryption operation. IMPORTANT - ensure you use a key
-     * and IV size appropriate for your cipher
-     * In this example we are using 256 bit AES (i.e. a 256 bit key). The
-     * IV size for *most* modes is the same as the block size. For AES this
-     * is 128 bits
-     */
+
+	// initialize encryption
     if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))  { handle_errors();}
-    /*
-     * Provide the message to be encrypted, and obtain the encrypted output.
-     * EVP_EncryptUpdate can be called multiple times if necessary
-     */
+
+	// encrypt
     if(1 != EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_length)) { handle_errors(); }
     ciphertext_length = len;
-	/*
-     * Finalise the encryption. Further ciphertext bytes may be written at
-     * this stage.
-     */
+
+	// finalize encryption
     if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len)) {handle_errors();}
     ciphertext_length += len;
 
-	//printf("Ciphertext buffer:\n");
-	//print_uchar_buffer(ciphertext, ciphertext_length);
-
-	/*
-	* Write the ciphertext buffer to file.
-	*/
 	FILE *f_out = fopen(out_file, "wb");
 	if (f_out) {
 		fwrite((unsigned char *) ciphertext, ciphertext_length, 1, f_out);
@@ -253,44 +233,42 @@ int main()
 	if (line) {free(line);}
 	fclose(credentials);
 
-
 	// daemon setup
     skeleton_daemon();	
 	
 	fd = inotify_init();	// create inotify instance;
 	if ( fd < 0 ) { perror( "inotify_init" ); }
 	
-	wd = inotify_add_watch( fd,  "/", IN_ALL_EVENTS  /* IN_IGNORED | IN_OPEN | IN_CLOSE_WRITE | IN_ATTRIB | IN_CREATE | IN_DELETE |IN_CLOSE | IN_MODIFY | IN_ACCESS */ );
+	wd = inotify_add_watch( fd,  "/", IN_ALL_EVENTS );
 
 	if(wd<0){
 		syslog(LOG_NOTICE, "wd < 0");
 		perror("inotify_add_watch");    
 	}
 	
-	
-    
     while (1)
     {
         //TODO: Insert daemon code here.
         syslog (LOG_NOTICE, "custom file encryption daemon started.");
-
 		/*read to determine the event change happens on directory. Actually this read blocks until the change event occurs*/
-			syslog (LOG_NOTICE, "BEFORE READ IN BUFFER");
-			length = read( fd, buffer, EVENT_BUF_LEN );
-
-		syslog (LOG_NOTICE, "AFTER READ IN BUFFER.");
-
-		/*checking for error*/
-		if ( length < 0 ) { perror( "read" ); }
-		else if(length == 0){ syslog(LOG_NOTICE," length =0 " ); continue; }
+		length = read( fd, buffer, EVENT_BUF_LEN );
 		
-		/*actually read return the list of change events happens. Here, read the change event one by one and process it accordingly.*/
-		while ( i < length ) {
-			struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
-			
-			i++;
+		if (length < 0) {
+			perror("read error");
+			exit(EXIT_FAILURE);
 		}
-		i = 0;
+		char *p = buffer;
+		while (p < buffer + length) {
+			struct inotify_event* e = (struct inotify_event*)p;
+			if (e->mask & IN_CREATE){
+				if  (e->mask & IN_ISDIR) {
+					syslog(LOG_NOTICE, "new directory %s created\n", e->name);
+				} else {
+					syslog(LOG_NOTICE, "new file %s created\n", e->name);
+				}
+			}
+			p += EVENT_SIZE + e->length
+		}
         sleep (20);
         break;
     }
@@ -298,5 +276,9 @@ int main()
     syslog (LOG_NOTICE, "custom file encryption daemon terminated.");
     closelog();
     
+	inotify_rm_watch(fd, wd);
+    close(fd);
+	
+	
     return EXIT_SUCCESS;
 }
