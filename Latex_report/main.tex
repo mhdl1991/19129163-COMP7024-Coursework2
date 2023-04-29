@@ -27,12 +27,18 @@
 
 \section{Description}
     \paragraph{}The objective of this project is to develop a program for the Minix 3.4 Operating System (OS) that will encrypt and decrypt files on the system when they are stored to disk and when the user reads them respectively, to prevent them from being read by outsiders.
-    \paragraph{}This program will be written in the C programming language, and has a GitHub repository which can be found at https://github.com/mhdl1991/19129163-COMP7024-Coursework2
+    \paragraph{}This program will be written in the C programming language, and has a GitHub repository at https://github.com/mhdl1991/19129163-COMP7024-Coursework2
     \paragraph{}This program will be developed as a \textbf{daemon}.
 
-\subsection{A Brief note on Daemons}
-    \paragraph{}A \textbf{Daemon} (sometimes claimed to be an acronym for\textit{Disk And Execution MONitor}) is a program that runs as a background process, not under direct control of a user, and supervises the system or provides functionality to other processes . Other terms for daemons include \textit{service}, \textit{ghost job}, or \textit{started task}.
-    \paragraph{}Examples of Unix daemons include \textbf{init}, \textbf{crond}, \textbf{httpd}, and \textbf{syncd}, all of which perform useful tasks in the operating system. As a *nix environment, Minix also has daemons, and also the \textbf{daemon} function which can be used to run scripts or processes as daemons.
+    \subsection{A Brief note on Daemons}
+        \paragraph{}A \textbf{Daemon} (sometimes claimed to be an acronym for\textit{Disk And Execution MONitor}) is a program that runs as a background process, not under direct control of a user, and supervises the system or provides functionality to other processes . Other terms for daemons include \textit{service}, \textit{ghost job}, or \textit{started task}.
+        \paragraph{}Examples of Unix daemons include \textbf{init}, \textbf{crond}, \textbf{httpd}, and \textbf{syncd}, all of which perform useful tasks in the operating system. As a *nix environment, Minix also has daemons, and also the \textbf{daemon} function which can be used to run scripts or processes as daemons. Daemons in Minix are started by \textbf{/etc/rc} and exist at Layer 4 alongside User processes\parencite{OS_DESIGN}.
+        \begin{figure}[htbp]
+            \centering\includegraphics[width=\textwidth]{minix_structure.jpg}
+            \caption{a diagram of the Minix structure- Daemons exist at Layer 4\parencite{OS_DESIGN}}
+            \label{fig:my_label}
+        \end{figure}
+
 
 \section{Requirements}
     \paragraph{}To build this daemon, we will need the following:
@@ -112,7 +118,6 @@
             \label{fig:my_label}
         \end{figure}
     
-
 \section{Testing}
     \paragraph{}The program is tested in it's standalone form first, to make sure that it is encrypting and decrypting files properly
     \paragraph{}It will be tested on a number of different file types and sizes, to see if encryption and decryption properly reverts the file back to it's former self.
@@ -129,6 +134,8 @@
     \paragraph{}Once testing of the individual sections and functions is complete, we can start putting them together and seeing how they work together, and how they work within the target system
     \paragraph{}Care must be taken to make backups of the system and the files on it in order to make sure recovery is possible if the program makes an error that damages core system files unusable and renders the system inoperable as a result.
 
+\section{Limitations}
+    \paragraph{}running this project as a \textbf{daemon} may have limited it's capabilities somewhat and it would perhaps have been more appropriate to create it as a \paragraph{driver}. Drivers exist on Layer 2 and have greater privileges than processes running on Layers 3 and 4 (the File System exists in Layer 3 and user processes exist on 4) \parencite{OS_DESIGN}.
 
 \section{Conclusion}
     \paragraph{}Operating systems are remarkably complex, even Minix, an OS built as an educational tool to show how OS kernels work, has a huge degree of complexity that must be taken into account when attempting to add on or expand on it.
