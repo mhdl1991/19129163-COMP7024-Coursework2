@@ -44,15 +44,16 @@
         \item Some way to store credentials (keys and initialization vectors)
         \item Some way to know which files have been encrypted and which have not
         \item permissions and policy settings to allow the daemon to alter files.
+        \item a suitably strong and tested encryption algorithm/cipher.
     \end{itemize}
-    \paragraph{}Details regarding the requirements for a cryptosystem will be discussed in the section concerning Encryption.
+    \paragraph{}Further details regarding the requirements for a cryptosystem will be discussed in the section concerning Encryption.
 
 \section{Encryption}
     \paragraph{}A common bit of advice regarding encryption is \textit{"Never roll your own cryptosystem"}- from technical and security standpoints it is better to use an existing, tried and tested cryptosystem (especially one that is compliant with international standards) than to develop your own- From a \textbf{technical} standpoint, it's very difficult to build your own cryptosystem and test it, and to make it \textbf{secure}, which ties into the \textbf{security} standpoint for not rolling your own cryptosystem.
     
     \paragraph{}For this software, we have the option of using \textbf{OpenSSL}, which can be installed on Minix using the \textbf{pkgin} utility.
     
-    \paragraph{}As per the OpenSSL documentation, it contains RSA, SHA, DES, SSL, TLS, and AES cipher suites/families. For this program we are using \textbf{256-bit AES encryption} in CBC (Cipher Block Chaining) mode, using OpenSSL's \textbf{EVP library} \parencite{openssl_evp}.
+    \paragraph{}As per the OpenSSL documentation, it contains RSA, SHA, DES, SSL, TLS, and AES cipher suites/families. For this program we are using \textbf{256-bit AES encryption} in CBC (Cipher Block Chaining) mode, using OpenSSL's \textbf{EVP library} \parencite{openssl_evp}, which meets several  requirements for cipher strength and security.
 
     \paragraph{}AES stands for \textbf{Advanced Encryption Standard} and is a variant of the Rijndael algorithm. It is a symmetric block cipher for the encryption of electronic data developed by the United States National Institute of Standards and Technology in 2001 \parencite{aes_256_nist}.
     \paragraph{}it works by taking a plaintext and a key, performing an operation, and repeatedly performing a set of \textbf{substitutions} (analogous to a classical substitution cipher) and \textbf{permutations} (analogous to a classical transposition cipher) on them.
@@ -77,7 +78,7 @@
     \paragraph{}In addition to the program itself, there may be additional user-configured files for storing the credentials for the daemon, and perhaps also a \textbf{blacklist} for excluding files that the user potentially doesn't want encrypted (this may be done for performance reasons- while testing showed encryption/decryption takes a tiny amount of time, this may vary based on the user machine).
 
 \section{Development}
-    \paragraph{}The program was first built as a standalone C program before attempting to integrate it with the Minix operating system. 
+    \paragraph{}The program is first built as a standalone C program before attempting to integrate it with the Minix operating system. 
     \paragraph{}This was done to make sure the file encryption and decryption functions worked properly and didn't result in bugs, memory leaks, unintended alterations to files, or other unintended consequences, and to reduce damage to the system.
     \paragraph{}This standalone program simply took a file, encrypted it using a hardcoded key and IV (the final program will read the credentials from an external source).
 
@@ -126,7 +127,7 @@
 
 \section{Integration Testing}
     \paragraph{}Once testing of the individual sections and functions is complete, we can start putting them together and seeing how they work together, and how they work within the target system
-    \paragraph{}Care must be taken to make backups of the system and the files on it in order to make sure recovery is possible if the program makes an error that damages core system files unusable and renders the system unoperable as a result
+    \paragraph{}Care must be taken to make backups of the system and the files on it in order to make sure recovery is possible if the program makes an error that damages core system files unusable and renders the system inoperable as a result.
 
 
 \section{Conclusion}
